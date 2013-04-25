@@ -1,5 +1,6 @@
 sax = require 'sax'
 events = require 'events'
+Stream = require 'stream'
 
 # Underscore has a nice function for this, but we try to go without dependencies
 isEmpty = (thing) ->
@@ -78,7 +79,7 @@ class exports.Parser extends events.EventEmitter
     @removeAllListeners()
     # make the SAX parser. tried trim and normalize, but they are not
     # very helpful
-    @saxParser = sax.parser @options.strict, {
+    @saxParser = sax.createStream @options.strict, {
       trim: false,
       normalize: false,
       xmlns: @options.xmlns
@@ -219,7 +220,11 @@ class exports.Parser extends events.EventEmitter
       @emit "end", null
       return true
 
-    @saxParser.write str.toString()
+    var stream = new Stream
+    stream.pipe = (dest) ->
+      dest.end(str.toString())
+
+    stream.pipe(@saxParser)
 
 exports.parseString = (str, a, b) ->
   # let's determine what we got as arguments
@@ -238,3 +243,17 @@ exports.parseString = (str, a, b) ->
   # the rest is super-easy
   parser = new exports.Parser options
   parser.parseString str, cb
+
+class exports.streamParser extends Stream
+  constructor: (opts) ->
+    @parser = new exports.Parser opts
+    @writable = true
+    @readable = false
+
+  write: (stringOrBuffer, encoding) ->
+    parser.saxParser.write stringOrBuffer encoding
+
+  end: (stringOrBuffer, enconding) ->
+    parser.saxParser.end stringOrBuffer endcoding
+
+  
