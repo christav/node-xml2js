@@ -4,6 +4,7 @@ fs = require 'fs'
 util = require 'util'
 assert = require 'assert'
 path = require 'path'
+eol = (require 'os').EOL
 
 fileName = path.join __dirname, '/fixtures/sample.xml'
 
@@ -53,7 +54,7 @@ module.exports =
     equ r.sample.cdatatest[0]._, 'CDATA here!'
     equ r.sample.nochartest[0].$.desc, 'No data'
     equ r.sample.nochartest[0].$.misc, 'false'
-    equ r.sample.listtest[0].item[0]._, '\n            This  is\n            \n            character\n            \n            data!\n            \n        '
+    equ r.sample.listtest[0].item[0]._, '' + eol + '            This  is' + eol + '            ' + eol + '            character' + eol + '            ' + eol + '            data!' + eol + '            ' + eol + '        '
     equ r.sample.listtest[0].item[0].subitem[0], 'Foo(1)'
     equ r.sample.listtest[0].item[0].subitem[1], 'Foo(2)'
     equ r.sample.listtest[0].item[0].subitem[2], 'Foo(3)'
@@ -72,7 +73,7 @@ module.exports =
     equ r.sample.cdatatest[0]._, 'CDATA here!'
     equ r.sample.nochartest[0].$.desc, 'No data'
     equ r.sample.nochartest[0].$.misc, 'false'
-    equ r.sample.listtest[0].item[0]._, '\n            This  is\n            \n            character\n            \n            data!\n            \n        '
+    equ r.sample.listtest[0].item[0]._, '' + eol + '            This  is' + eol + '            ' + eol + '            character' + eol + '            ' + eol + '            data!' + eol + '            ' + eol + '        '
     equ r.sample.listtest[0].item[0].subitem[0]._, 'Foo(1)'
     equ r.sample.listtest[0].item[0].subitem[1]._, 'Foo(2)'
     equ r.sample.listtest[0].item[0].subitem[2]._, 'Foo(3)'
@@ -105,7 +106,7 @@ module.exports =
     equ r.sample.$$.cdatatest[0]._, 'CDATA here!'
     equ r.sample.$$.nochartest[0].$.desc, 'No data'
     equ r.sample.$$.nochartest[0].$.misc, 'false'
-    equ r.sample.$$.listtest[0].$$.item[0]._, '\n            This  is\n            \n            character\n            \n            data!\n            \n        '
+    equ r.sample.$$.listtest[0].$$.item[0]._, '' + eol + '            This  is' + eol + '            ' + eol + '            character' + eol + '            ' + eol + '            data!' + eol + '            ' + eol + '        '
     equ r.sample.$$.listtest[0].$$.item[0].$$.subitem[0], 'Foo(1)'
     equ r.sample.$$.listtest[0].$$.item[0].$$.subitem[1], 'Foo(2)'
     equ r.sample.$$.listtest[0].$$.item[0].$$.subitem[2], 'Foo(3)'
@@ -124,7 +125,7 @@ module.exports =
     console.log 'Result object: ' + util.inspect r, false, 10
     equ r.sample.$$.chartest[0].$$._, 'Character data here!'
     equ r.sample.$$.cdatatest[0].$$._, 'CDATA here!'
-    equ r.sample.$$.listtest[0].$$.item[0].$$._, '\n            This  is\n            \n            character\n            \n            data!\n            \n        '
+    equ r.sample.$$.listtest[0].$$.item[0].$$._, '' + eol + '            This  is' + eol + '            ' + eol + '            character' + eol + '            ' + eol + '            data!' + eol + '            ' + eol + '        '
     # determine number of items in object
     equ Object.keys(r.sample.$$.tagcasetest[0].$$).length, 3)
 
@@ -132,13 +133,13 @@ module.exports =
     equ r.sample.whitespacetest[0]._, 'Line One Line Two')
 
   'test text trimming, no normalizing': skeleton(trim: true, normalize: false, (r) ->
-    equ r.sample.whitespacetest[0]._, 'Line One\n        Line Two')
+    equ r.sample.whitespacetest[0]._, 'Line One' + eol + '        Line Two')
 
   'test text no trimming, normalize': skeleton(trim: false, normalize: true, (r) ->
     equ r.sample.whitespacetest[0]._, 'Line One Line Two')
 
   'test text no trimming, no normalize': skeleton(trim: false, normalize: false, (r) ->
-    equ r.sample.whitespacetest[0]._, '\n        Line One\n        Line Two\n    ')
+    equ r.sample.whitespacetest[0]._, '' + eol + '        Line One' + eol + '        Line Two' + eol + '    ')
 
   'test enabled root node elimination': skeleton(__xmlString: '<root></root>', explicitRoot: false, (r) ->
     console.log 'Result object: ' + util.inspect r, false, 10
@@ -187,7 +188,7 @@ module.exports =
     equ r.sample.chartest, 'Character data here!'
     equ r.sample.cdatatest, 'CDATA here!'
     assert.equal r.sample.nochartest[0], ''
-    equ r.sample.listtest[0].item[0]._, '\n            This  is\n            \n            character\n            \n            data!\n            \n        '
+    equ r.sample.listtest[0].item[0]._, '' + eol + '            This  is' + eol + '            ' + eol + '            character' + eol + '            ' + eol + '            data!' + eol + '            ' + eol + '        '
     equ r.sample.listtest[0].item[0].subitem[0], 'Foo(1)'
     equ r.sample.listtest[0].item[0].subitem[1], 'Foo(2)'
     equ r.sample.listtest[0].item[0].subitem[2], 'Foo(3)'
