@@ -89,7 +89,7 @@ class exports.Parser extends events.EventEmitter
     # emit one error event if the sax parser fails. this is mostly a hack, but
     # the sax parser isn't state of the art either.
     err = false
-    @saxParser.onerror = (error) =>
+    @saxParser.on "error", (error) =>
       if ! err
         err = true
         @emit "error", error
@@ -232,8 +232,7 @@ class exports.Parser extends events.EventEmitter
     stream.writable = true
     stream.readable = false
 
-    @on 'end', (result) =>
-      util.puts "Parser ending"
+    @on "end", (result) =>
       @reset()
       if @options.async
         process.nextTick ->
@@ -241,7 +240,7 @@ class exports.Parser extends events.EventEmitter
       else
         cb null, result
 
-    @on 'error', (err) =>
+    @on "error", (err) =>
       @reset()
 
       if @options.async
