@@ -256,8 +256,8 @@ class exports.StreamParser extends Stream
       cb err
 
   write: (stringOrBuffer, encoding) ->
-    parser.saxParser.write stringOrBuffer encoding
+    @parser.saxParser.write stringOrBuffer, encoding
 
-  end: (stringOrBuffer, enconding) ->
-    parser.saxParser.end stringOrBuffer endcoding
+  end: (stringOrBuffer, encoding) ->
+    @parser.saxParser.end stringOrBuffer, encoding
 

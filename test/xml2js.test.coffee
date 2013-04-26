@@ -5,11 +5,11 @@ util = require 'util'
 assert = require 'assert'
 path = require 'path'
 os = require 'os'
+Stream = require 'stream'
 
 fileName = path.join __dirname, '/fixtures/sample.xml'
 
 skeleton_string = (options, checks) ->
-  console.log 'this thing on?'
   (test) ->
     xmlString = options?.__xmlString
     delete options?.__xmlString
@@ -25,18 +25,21 @@ skeleton_string = (options, checks) ->
       x2js.parseString xmlString
 
 skeleton_stream = (options, checks) ->
-  console.log 'streamin'
   (test) ->
     xmlString = options?.__xmlString
     delete options?.__xmlString
-    x2js = new xml2js.StreamParser options, (err, result) ->
-      checks results
+    x2js = new xml2js.StreamParser options, (err, r) ->
+      checks r
       test.finish()
 
     if not xmlString
-      fs.createReadStream(filename, {flags: 'r', encoding: 'utf8'}).pipe(x2js)
+      fs.createReadStream(fileName, {flags: 'r', encoding: 'utf8'}).pipe(x2js)
     else
-      x2js.parseString xmlString    
+      stream = new Stream
+      stream.pipe = (dest) ->
+        dest.end(xmlString.toString())
+
+      stream.pipe(x2js)
 
 skeleton = skeleton_stream
 
