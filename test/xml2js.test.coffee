@@ -8,7 +8,8 @@ os = require 'os'
 
 fileName = path.join __dirname, '/fixtures/sample.xml'
 
-skeleton = (options, checks) ->
+skeleton_string = (options, checks) ->
+  console.log 'this thing on?'
   (test) ->
     xmlString = options?.__xmlString
     delete options?.__xmlString
@@ -22,6 +23,23 @@ skeleton = (options, checks) ->
         x2js.parseString data
     else
       x2js.parseString xmlString
+
+skeleton_stream = (options, checks) ->
+  console.log 'streamin'
+  (test) ->
+    xmlString = options?.__xmlString
+    delete options?.__xmlString
+    x2js = new xml2js.StreamParser options, (err, result) ->
+      checks results
+      test.finish()
+
+    if not xmlString
+      fs.createReadStream(filename, {flags: 'r', encoding: 'utf8'}).pipe(x2js)
+    else
+      x2js.parseString xmlString    
+
+skeleton = skeleton_stream
+
 ###
 The `validator` function validates the value at the XPath. It also transforms the value
 if necessary to conform to the schema or other validation information being used. If there

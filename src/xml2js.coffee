@@ -220,7 +220,7 @@ class exports.Parser extends events.EventEmitter
       @emit "end", null
       return true
 
-    var stream = new Stream
+    stream = new Stream
     stream.pipe = (dest) ->
       dest.end(str.toString())
 
@@ -244,11 +244,16 @@ exports.parseString = (str, a, b) ->
   parser = new exports.Parser options
   parser.parseString str, cb
 
-class exports.streamParser extends Stream
-  constructor: (opts) ->
-    @parser = new exports.Parser opts
+class exports.StreamParser extends Stream
+  constructor: (opts, cb) ->
     @writable = true
     @readable = false
+    @parser = new exports.Parser opts
+    @parser.on 'end', (result) ->
+      cb null, result
+
+    @parser.on 'error', (err) ->
+      cb err
 
   write: (stringOrBuffer, encoding) ->
     parser.saxParser.write stringOrBuffer encoding
@@ -256,4 +261,3 @@ class exports.streamParser extends Stream
   end: (stringOrBuffer, enconding) ->
     parser.saxParser.end stringOrBuffer endcoding
 
-  
