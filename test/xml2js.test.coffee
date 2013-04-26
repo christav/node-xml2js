@@ -9,6 +9,20 @@ Stream = require 'stream'
 
 fileName = path.join __dirname, '/fixtures/sample.xml'
 
+class TextFilter extends Stream
+  constructor: ->
+    @readable = true
+    @writable = true
+
+  write: (data, encoding) ->
+    newdata = data.split(os.EOL).join('\n')
+    this.emit 'data', newdata, encoding
+
+  end: (data, encoding) ->
+    if data
+      @write data, encoding
+    this.emit 'end'
+
 skeleton_string = (options, checks) ->
   (test) ->
     xmlString = options?.__xmlString
@@ -28,12 +42,13 @@ skeleton_stream = (options, checks) ->
   (test) ->
     xmlString = options?.__xmlString
     delete options?.__xmlString
-    x2js = new xml2js.StreamParser options, (err, r) ->
-      checks r
-      test.finish()
+    x2js = xml2js.streamParser options, (err, r) ->
+      if ! err
+        checks r
+        test.finish()
 
     if not xmlString
-      fs.createReadStream(fileName, {flags: 'r', encoding: 'utf8'}).pipe(x2js)
+      fs.createReadStream(fileName, {flags: 'r', encoding: 'utf8'}).pipe(new TextFilter()).pipe(x2js)
     else
       stream = new Stream
       stream.pipe = (dest) ->
@@ -322,3 +337,4 @@ module.exports =
     xml2js.parseString html, strict: false, (err, parsed) ->
       equ err, null
       test.finish()
+###

@@ -1,6 +1,7 @@
 sax = require 'sax'
 events = require 'events'
 Stream = require 'stream'
+util = require 'util'
 
 # Underscore has a nice function for this, but we try to go without dependencies
 isEmpty = (thing) ->
@@ -226,6 +227,39 @@ class exports.Parser extends events.EventEmitter
 
     stream.pipe(@saxParser)
 
+  createStream: (cb) =>
+    stream = new Stream
+    stream.writable = true
+    stream.readable = false
+
+    @on 'end', (result) =>
+      util.puts "Parser ending"
+      @reset()
+      if @options.async
+        process.nextTick ->
+          cb null, result
+      else
+        cb null, result
+
+    @on 'error', (err) =>
+      @reset()
+
+      if @options.async
+        process.nextTick ->
+          cb err
+      else
+        cb err
+
+    stream.write = (data, encoding) =>
+      @saxParser.write data, encoding
+
+    stream.end = (data, encoding) =>
+      if arguments.length > 0
+        @saxParser.write data, encoding
+      @saxParser.end
+
+    stream
+
 exports.parseString = (str, a, b) ->
   # let's determine what we got as arguments
   if b?
@@ -244,20 +278,6 @@ exports.parseString = (str, a, b) ->
   parser = new exports.Parser options
   parser.parseString str, cb
 
-class exports.StreamParser extends Stream
-  constructor: (opts, cb) ->
-    @writable = true
-    @readable = false
-    @parser = new exports.Parser opts
-    @parser.on 'end', (result) ->
-      cb null, result
-
-    @parser.on 'error', (err) ->
-      cb err
-
-  write: (stringOrBuffer, encoding) ->
-    @parser.saxParser.write stringOrBuffer, encoding
-
-  end: (stringOrBuffer, encoding) ->
-    @parser.saxParser.end stringOrBuffer, encoding
-
+exports.streamParser = (opts, cb) ->
+  parser = new exports.Parser opts
+  parser.createStream cb
